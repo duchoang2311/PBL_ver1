@@ -19,6 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String userName = "";
   String email = "";
+  String profilePic = "";
   AuthService authService = AuthService();
   Stream? groups;
   bool _isLoading = false;
@@ -29,13 +30,14 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     gettingUserData();
   }
+
 //string manipulation
-  String getId(String res){
-    return res.substring(0,res.indexOf("_"));
+  String getId(String res) {
+    return res.substring(0, res.indexOf("_"));
   }
 
-  String getName(String res){
-    return res.substring(res.indexOf("_")+1);
+  String getName(String res) {
+    return res.substring(res.indexOf("_") + 1);
   }
 
   gettingUserData() async {
@@ -47,6 +49,11 @@ class _HomePageState extends State<HomePage> {
     await HelperFunctions.getUserNameFromSF().then((val) {
       setState(() {
         userName = val!;
+      });
+    });
+    await HelperFunctions.getPictureFromSF().then((val) {
+      setState(() {
+        profilePic = val ?? "";
       });
     });
     //getting the list of snapshots in our stream
@@ -82,104 +89,122 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 50),
-          children: <Widget>[
-            Icon(
-              Icons.account_circle,
-              size: 150,
-              color: Colors.grey[700],
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Text(
-              userName,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            const Divider(
-              height: 2,
-            ),
-            ListTile(
-              onTap: () {},
-              selectedColor: Theme.of(context).primaryColor,
-              selected: true,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              leading: const Icon(Icons.group),
-              title: const Text(
-                "Groups",
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ListTile(
-              onTap: () {
-                nextScreenReplace(
-                    context,
-                    ProfilePage(
-                      userName: userName,
-                      email: email,
-                    ));
-              },
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              leading: const Icon(Icons.group),
-              title: const Text(
-                "Profile",
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ListTile(
-              onTap: () async {
-                showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text("Logout"),
-                        content: const Text("Are you sure you want to logout?"),
-                        actions: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.red,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () async {
-                              await authService.signOut();
-                              Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                      builder: (context) => const LoginPage()),
-                                  (route) => false);
-                            },
-                            icon: Icon(
-                              Icons.done,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      );
-                    });
-              },
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              leading: const Icon(Icons.exit_to_app),
-              title: const Text(
-                "Logout",
-                style: TextStyle(color: Colors.black),
-              ),
-            )
-          ],
-        ),
-      ),
+          child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 50),
+              itemCount:
+                  1, // Đặt số lượng item là 1 nếu bạn chỉ có một hình ảnh
+              itemBuilder: (context, index) {
+                return Column(
+                  children: <Widget>[
+                    if (profilePic != "")
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(75),
+                        child: Image.network(
+                          profilePic,
+                          width: 150,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    else
+                      Icon(
+                        Icons.account_circle,
+                        size: 150,
+                        color: Colors.grey[700],
+                      ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Text(
+                      userName,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    const Divider(
+                      height: 2,
+                    ),
+                    ListTile(
+                      onTap: () {},
+                      selectedColor: Theme.of(context).primaryColor,
+                      selected: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                      leading: const Icon(Icons.group),
+                      title: const Text(
+                        "Groups",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    ListTile(
+                      onTap: () {
+                        nextScreenReplace(
+                            context,
+                            ProfilePage(
+                              userName: userName,
+                              email: email,
+                              profilePic: profilePic,
+                            ));
+                      },
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                      leading: const Icon(Icons.group),
+                      title: const Text(
+                        "Profile",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    ListTile(
+                      onTap: () async {
+                        showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text("Logout"),
+                                content: const Text(
+                                    "Are you sure you want to logout?"),
+                                actions: [
+                                  IconButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    icon: Icon(
+                                      Icons.cancel,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () async {
+                                      await authService.signOut();
+                                      Navigator.of(context).pushAndRemoveUntil(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LoginPage()),
+                                          (route) => false);
+                                    },
+                                    icon: Icon(
+                                      Icons.done,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            });
+                      },
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                      leading: const Icon(Icons.exit_to_app),
+                      title: const Text(
+                        "Logout",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    )
+                  ],
+                );
+              })),
       body: groupList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -201,78 +226,78 @@ class _HomePageState extends State<HomePage> {
         barrierDismissible: false,
         context: context,
         builder: (context) {
-          return StatefulBuilder(
-            builder: ((context,setState){
-            return  AlertDialog(
-            title: const Text(
-              "Create a group",
-              textAlign: TextAlign.left,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _isLoading == true
-                    ? Center(
-                        child: CircularProgressIndicator(
-                            color: Theme.of(context).primaryColor),
-                      )
-                    : TextField(
-                      onChanged: (val){
-                        setState(() {
-                          groupName = val;
-                        });
-                      },
-                      style: const TextStyle(color:Colors.black ),
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Theme.of(context).primaryColor),
-                          borderRadius: BorderRadius.circular(20)),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color:Colors.red),
-                          borderRadius: BorderRadius.circular(20)),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Theme.of(context).primaryColor),
-                          borderRadius: BorderRadius.circular(20))
-                          ),
-                    ),
-              ],
-            ),
-            actions : [
-              ElevatedButton(
-              onPressed: (){
-                Navigator.of(context).pop();
-              }, 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor
+          return StatefulBuilder(builder: ((context, setState) {
+            return AlertDialog(
+              title: const Text(
+                "Create a group",
+                textAlign: TextAlign.left,
               ),
-              child: const Text("CANCEL"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _isLoading == true
+                      ? Center(
+                          child: CircularProgressIndicator(
+                              color: Theme.of(context).primaryColor),
+                        )
+                      : TextField(
+                          onChanged: (val) {
+                            setState(() {
+                              groupName = val;
+                            });
+                          },
+                          style: const TextStyle(color: Colors.black),
+                          decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                  borderRadius: BorderRadius.circular(20)),
+                              errorBorder: OutlineInputBorder(
+                                  borderSide:
+                                      const BorderSide(color: Colors.red),
+                                  borderRadius: BorderRadius.circular(20)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                  borderRadius: BorderRadius.circular(20))),
+                        ),
+                ],
               ),
-              ElevatedButton(
-              onPressed: () async{
-                if(groupName != ""){
-                    setState(() {
-                      _isLoading =true;
-                    });
-                    DatabaseService(uid : FirebaseAuth.instance.currentUser!.uid)
-                    .createGroup(userName, FirebaseAuth.instance.currentUser!.uid, groupName)
-                    .whenComplete((){
-                        _isLoading = false;
-                    });
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
                     Navigator.of(context).pop();
-                    showSnackbar(context, Colors.green, "Group created successfully");
-                }
-              }, 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor
-              ),
-              child: const Text("CREATE"),
-              )
-            ],
-          );
-        }));
-      });
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (groupName != "") {
+                      setState(() {
+                        _isLoading = true;
+                      });
+                      DatabaseService(
+                              uid: FirebaseAuth.instance.currentUser!.uid)
+                          .createGroup(userName,
+                              FirebaseAuth.instance.currentUser!.uid, groupName)
+                          .whenComplete(() {
+                        _isLoading = false;
+                      });
+                      Navigator.of(context).pop();
+                      showSnackbar(
+                          context, Colors.green, "Group created successfully");
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor),
+                  child: const Text("CREATE"),
+                )
+              ],
+            );
+          }));
+        });
   }
 
   groupList() {
@@ -285,11 +310,12 @@ class _HomePageState extends State<HomePage> {
             if (snapshot.data['groups'].length != 0) {
               return ListView.builder(
                 itemCount: snapshot.data['groups'].length,
-                itemBuilder: (context,index){                 
+                itemBuilder: (context, index) {
                   int reverseIndex = snapshot.data['groups'].length - index - 1;
-                  return GroupTile( 
-                    groupId: getId(snapshot.data['groups'][reverseIndex]),
-                    groupName: getName(snapshot.data['groups'][reverseIndex]), userName: snapshot.data['fullName']);
+                  return GroupTile(
+                      groupId: getId(snapshot.data['groups'][reverseIndex]),
+                      groupName: getName(snapshot.data['groups'][reverseIndex]),
+                      userName: snapshot.data['fullName']);
                 },
               );
             } else {

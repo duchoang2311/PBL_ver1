@@ -49,7 +49,9 @@ class _LoginPageState extends State<LoginPage> {
                         const Text("Login now to see what they are talking!",
                             style: TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.w400)),
-                        Image.asset("assets/login.png"),
+                        const SizedBox(height: 20),
+                        Image.asset("assets/logo.jpg"),
+                        const SizedBox(height: 40),
                         TextFormField(
                           decoration: textInputDecoration.copyWith(
                               labelText: "Email",
@@ -157,6 +159,7 @@ class _LoginPageState extends State<LoginPage> {
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserEmailSF(email);
           await HelperFunctions.saveUserNameSF(snapshot.docs[0]['fullName']);
+          await HelperFunctions.saveUserPictureSF(snapshot.docs[0]['profilePic']);
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackbar(context, Colors.red, value);
